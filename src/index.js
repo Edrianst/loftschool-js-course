@@ -114,15 +114,14 @@ function returnArgumentsArray() {
 
    console.log(newSum()) выведет 6
  */
-function bindFunction(fn) {
-    return fn.apply(this, [].slice.call(arguments, 1));
-}
+// function bindFunction(fn) {
+// }
 
 export {
     returnFirstArgument,
     sumWithDefaults,
     returnArgumentsArray,
     returnFnResult,
-    returnCounter,
-    bindFunction
+    returnCounter
+    // bindFunction
 }
