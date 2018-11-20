@@ -102,6 +102,16 @@ const clearInput = () => {
     filterResult.innerHTML = null;
 }
 
+const createList = (town) => {
+    let list = document.createDocumentFragment();
+    const item = document.createElement('li');
+
+    item.textContent = town.name;
+    list.appendChild(item);
+
+    return list;
+}
+
 let townsArr = [];
 
 loadTowns()
@@ -123,17 +133,11 @@ filterInput.addEventListener('keyup', function() {
         return isMatching(town.name, inputValue);
     });
 
-    let list = document.createDocumentFragment();
+    for (let town of filteredTowns) {
+        let townItem = createList(town);
 
-    filteredTowns.map(town => {
-        const item = document.createElement('li');
-
-        item.textContent = town.name;
-        list.appendChild(item);
-    });
-
-    filterResult.appendChild(list);
-
+        filterResult.appendChild(townItem);
+    }
 });
 
 export {
