@@ -37,6 +37,35 @@ const homeworkContainer = document.querySelector('#homework-container');
  https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
  */
 function loadTowns() {
+    const sortTowns = (a, b) => {
+        if (a.name > b.name) {
+            return 1;
+        } else if (a.name < b.name) {
+            return -1;
+        } else {
+            return 0;
+        }
+    }
+
+    return new Promise(resolve => {
+        const xhr = new XMLHttpRequest();
+
+        xhr.open('GET', 'https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json');
+        xhr.send();
+
+        xhr.addEventListener('load', () => {
+
+            if (xhr.status >= '400') {
+                console.log('Произошла ошибка');
+            } else {
+
+                const towns = JSON.parse(xhr.responseText);
+
+                towns.sort(sortTowns);
+                resolve(towns);
+            }
+        })
+    })
 }
 
 /*
@@ -51,6 +80,8 @@ function loadTowns() {
    isMatching('Moscow', 'Moscov') // false
  */
 function isMatching(full, chunk) {
+
+    return full.toLowerCase().indexOf(chunk.toLowerCase()) !== -1;
 }
 
 /* Блок с надписью "Загрузка" */
@@ -62,8 +93,47 @@ const filterInput = homeworkContainer.querySelector('#filter-input');
 /* Блок с результатами поиска */
 const filterResult = homeworkContainer.querySelector('#filter-result');
 
+const showFilter = () => {
+    loadingBlock.style.display = 'none';
+    filterBlock.style.display = 'block';
+}
+
+const clearInput = () => {
+    filterResult.innerHTML = null;
+}
+
+let townsArr = [];
+
+loadTowns()
+    .then(towns => {
+        if (!towns) return;
+        showFilter();
+        townsArr = towns;
+    })
+
 filterInput.addEventListener('keyup', function() {
     // это обработчик нажатия кливиш в текстовом поле
+    clearInput();
+
+    let inputValue = filterInput.value;
+
+    if (!inputValue) return;
+
+    let filteredTowns = townsArr.filter(town => {
+        return isMatching(town.name, inputValue);
+    });
+
+    let list = document.createDocumentFragment();
+
+    filteredTowns.map(town => {
+        const item = document.createElement('li');
+
+        item.textContent = town.name;
+        list.appendChild(item);
+    });
+
+    filterResult.appendChild(list);
+
 });
 
 export {
