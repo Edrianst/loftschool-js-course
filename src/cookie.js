@@ -43,10 +43,100 @@ const addButton = homeworkContainer.querySelector('#add-button');
 // таблица со списком cookie
 const listTable = homeworkContainer.querySelector('#list-table tbody');
 
-filterNameInput.addEventListener('keyup', function() {
+const setCookie = (name, value, expires) => {
+
+    document.cookie = `${name}=${value}; expires=${expires}`;
+
+    addNameInput.value = '';
+    addValueInput.value = '';
+}
+
+const updateTable = () => {
+    listTable.innerHTML = null;
+    createTable(parseCookie())
+}
+
+const parseCookie = () => {
+    const result = document.cookie.split('; ').reduce((prev, current) => {
+        const [name, value] = current.split('=');
+
+        prev[name] = value;
+
+        return prev;
+    }, {});
+
+    return result;
+}
+
+const deleteCookie = (name) => {
+    let date = new Date(0);
+
+    setCookie(name, '', date.toUTCString());
+}
+
+const isMatching = (full, part) => {
+    return full.toLowerCase().indexOf(part.toLowerCase()) !== -1;
+}
+
+const createTable = (obj) => {
+    for (let keys in obj) {
+        const row = document.createElement('tr');
+
+        if (keys) {
+            row.innerHTML = '<td>' + keys + '</td>' +
+                '<td>' + obj[keys] + '</td>' +
+                '<td>' +
+                '<button class="btn-delete">Удалить</button>' +
+                '</td>';
+            listTable.appendChild(row);
+            const deleteBtn = row.querySelector('.btn-delete');
+
+            deleteBtn.addEventListener('click', () => {
+                deleteCookie(keys);
+                listTable.removeChild(row);
+            })
+        }
+    }
+}
+
+const createFilteredTable = (props, object) => {
+    for (let keys in props) {
+        const row = document.createElement('tr');
+
+        row.innerHTML = '<td>' + props[keys] + '</td>' +
+            '<td>' + object[props[keys]] + '</td>' +
+            '<td>' +
+            '<button class="btn-delete">Удалить</button>' +
+            '</td>';
+        listTable.appendChild(row);
+
+        const deleteBtn = row.querySelector('.btn-delete');
+
+        deleteBtn.addEventListener('click', () => {
+            deleteCookie(props[keys]);
+            listTable.removeChild(row);
+        })
+    }
+}
+
+filterNameInput.addEventListener('keyup', function () {
     // здесь можно обработать нажатия на клавиши внутри текстового поля для фильтрации cookie
+    listTable.innerHTML = null;
+    let filterValue = filterNameInput.value;
+
+    const cookies = parseCookie();
+    const cookieNames = Object.keys(cookies);
+    const namesFilter = cookieNames.filter(el => el && (isMatching(el, filterValue) || isMatching(cookies[el], filterValue)));
+
+    if (filterValue === '') {
+        updateTable();
+    } else {
+        createFilteredTable(namesFilter, cookies);
+    }
 });
 
 addButton.addEventListener('click', () => {
-    // здесь можно обработать нажатие на кнопку "добавить cookie"
-});
+    // здесь можно обработать нажатие на кнопку "добавить cookie";
+    setCookie(addNameInput.value, addValueInput.value);
+    updateTable();
+})
